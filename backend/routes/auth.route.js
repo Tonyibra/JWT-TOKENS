@@ -3,6 +3,10 @@ const router = express.Router();
 const mongoose = require("mongoose");
 const User = require("../models/User.model");
 const getUser = require("../middlewares/User.midlleware");
+const bcrypt = require("bcrypt");
+const { json } = require("express");
+const saltRounds = 10;
+
 //get
 
 router.get("/", async (req, res) => {
@@ -26,10 +30,22 @@ router.post("/register", async (req, res) => {
 	});
 
 	try {
+		newUser.password = await bcrypt.hash(newUser.password, saltRounds);
 		const user = await newUser.save();
 		res.json(user);
 	} catch (err) {
 		console.log({ message: err.message });
+	}
+});
+router.post("/login", async (req, res) => {
+	const username = req.body.name;
+	const password = req.body.password;
+
+	// const dbUser = await User.findOne({ name: username });
+	try {
+		checkUser(username, password, res);
+	} catch (err) {
+		res.json({ message: err.message });
 	}
 });
 
@@ -56,4 +72,21 @@ router.delete("/:id", getUser, async (req, res) => {
 		res.json({ message: err.message });
 	}
 });
+
+async function checkUser(username, passowrd, res) {
+	const dbUser = await User.findOne({ name: username });
+
+	if (username === dbUser.name) {
+		const match = await bcrypt.compare(
+			passowrd,
+			dbUser.password,
+			function (err, result) {
+				if (result === true) {
+					res.redirect(`/auth/${dbUser._id}`);
+				}
+			}
+		);
+	}
+}
+
 module.exports = router;

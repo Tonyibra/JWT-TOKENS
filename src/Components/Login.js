@@ -1,55 +1,32 @@
 import React, { useState } from "react";
 import axios from "axios";
-import Alert from "@material-ui/lab/Alert";
 const Login = () => {
-	const [userName, setUserName] = useState();
+	const [user, setUser] = useState();
 	const [password, setPassword] = useState();
-	const [cpassword, setCPassword] = useState();
-	const [passDontMtach, setPassDontMatch] = useState("");
-	const getUserName = (e) => {
-		console.log(e.target.value);
-		setUserName(e.target.value);
+	const inputUser = (e) => {
+		setUser(e.target.value);
 	};
-	const getpassword = (e) => {
-		console.log(e.target.value);
+	const inputPassword = (e) => {
 		setPassword(e.target.value);
 	};
-	const confirmPassword = (e) => {
-		console.log(e.target.value);
-		setCPassword(e.target.value);
+
+	const options = {
+		headers: {
+			name: user,
+			password: password,
+		},
 	};
-
-	const submitInfo = async () => {
-		const options = {
-			headers: { name: userName, password: password },
-		};
-		const registerEndPoint = "http://localhost:5000/auth/register";
-
-		if (password !== cpassword) {
-			setPassDontMatch("passwords does not match");
-		} else {
-			const register = await axios.post(registerEndPoint, options.headers).then(
-				(res) => {
-					console.log(res);
-				},
-				(error) => {
-					console.log(error);
-				}
-			);
-			setPassDontMatch("");
-		}
+	const submit = async () => {
+		const login = await axios.post(
+			"http://localhost:5000/auth/login",
+			options.headers
+		);
 	};
 	return (
 		<div className="login">
-			{passDontMtach !== "" && <Alert severity="error">{passDontMtach}</Alert>}
-			<input onChange={getUserName} type="text" placeholder="full name" />
-			<input onChange={getpassword} type="text" placeholder="password" />
-			<input
-				onChange={confirmPassword}
-				type="text"
-				placeholder="repeat password"
-			/>
-			<button onClick={submitInfo}>Login</button>
+			<input onChange={inputUser} type="text" placeholder="username" />
+			<input onChange={inputPassword} type="password" placeholder="password" />
+			<button onClick={submit}>Login</button>
 		</div>
 	);
 };
